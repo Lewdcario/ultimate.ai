@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Body, Controller, Post, Route, Middlewares } from 'tsoa';
 import validateSchema from '../middleware/validate';
 import { fetchIntents } from '../util/intents';
