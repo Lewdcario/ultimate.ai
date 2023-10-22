@@ -34,9 +34,12 @@ jobs:
       #- name: Run tests
       #  run: yarn test
 
+      - name: Generate Docs
+        run: yarn docs
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: dist/routes
+          folder: docs
           token: ${{ secrets.TOKEN }}
