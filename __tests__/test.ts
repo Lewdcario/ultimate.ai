@@ -124,7 +124,7 @@ describe('Testing Suite', function() {
 				.post('/getReply')
 				.send({ botId: process.env.BOT_ID!, message: 'some_message' });
 
-			console.log('res', res);
+			console.log('res.body', res.body);
 
 			expect(res.body.reply).to.equal(Responses.NotFound);
 		});
