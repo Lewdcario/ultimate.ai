@@ -41,27 +41,31 @@ describe('Testing Suite', function() {
 	});
 
 	describe('errorHandler', () => {
+		afterEach(() => {
+			sinon.restore();
+		});
+
 		it('should return a function', () => {
 			const fn = errorHandler;
 			expect(typeof fn).to.equal('function');
 		});
 
 		it('should return a 404 status code on not found', async () => {
+			sinon.stub(console, 'error');
 			await request(app).get('/invalid-link').expect(404);
 		});
 
 		it('should capture console.error', async () => {
-			const consoleSpy = sinon.spy(console, 'error');
-
+			const consoleStub = sinon.stub(console, 'error');
 			await request(app)
 				.get('/force-error')
 				.expect(() => {
-					expect(consoleSpy.called).to.be.true;
-					consoleSpy.restore();
+					expect(consoleStub.called).to.be.true;
 				});
 		});
 
 		it('should send a 500 status code with a JSON response', async () => {
+			sinon.stub(console, 'error');
 			await request(app)
 				.get('/force-error')
 				.expect(500)
@@ -73,16 +77,26 @@ describe('Testing Suite', function() {
 		});
 	});
 
-	describe('POST /getReply', () => {
+	describe('Sanity Checks', () => {
 		afterEach(() => {
 			sinon.restore();
 		});
-
-		// Sanity check
+		
 		it('Successfully stubs fetchIntents with Sinon', async () => {
 			sinon.stub(intentsModule, 'fetchIntents').returns(Promise.resolve('Subbed by Sinon') as any);
 			const response = await fetchIntents(process.env.BOT_ID!, 'some_message');
 			assert.equal(response, 'Subbed by Sinon');
+		});
+
+		it('process.env.BOT_ID is defined', () => {
+			assert.ok(process.env.BOT_ID);
+			assert.equal(typeof process.env.BOT_ID, 'string');
+		});
+	});
+
+	describe('POST /getReply', () => {
+		afterEach(() => {
+			sinon.restore();
 		});
 
 		// TODO: Remove comment
