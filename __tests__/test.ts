@@ -8,6 +8,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import app from '../src/Server';
+import Logger from '../src/util/Logger';
 import errorHandler from '../src/middleware/onError';
 import { Reply, seed } from '../src/util/db';
 import { Responses } from '../src/util/Constants';
@@ -50,12 +51,12 @@ describe('Testing Suite', function() {
 		});
 
 		it('should return a 404 status code on not found', async () => {
-			sinon.stub(console, 'error');
+			sinon.stub(Logger, 'error');
 			await request(app).get('/invalid-link').expect(404);
 		});
 
 		it('should capture console.error', async () => {
-			const consoleStub = sinon.stub(console, 'error');
+			const consoleStub = sinon.stub(Logger, 'error');
 			await request(app)
 				.get('/force-error')
 				.expect(() => {
@@ -64,7 +65,7 @@ describe('Testing Suite', function() {
 		});
 
 		it('should send a 500 status code with a JSON response', async () => {
-			sinon.stub(console, 'error');
+			sinon.stub(Logger, 'error');
 			await request(app)
 				.get('/force-error')
 				.expect(500)
@@ -140,7 +141,7 @@ describe('Testing Suite', function() {
 		it('selects the intent with the highest confidence', async () => {
 			sinon.stub(intentsModule, 'fetchIntents').returns(Promise.resolve([
 				{ intent: 'Farewell', name: 'Farewell', confidence: 0.7 },
-				{ intent: 'Greeting', name: 'Greeting', confidence: 0.9 },
+				{ intent: 'Greeting', name: 'Greeting', confidence: 0.9 }
 			]));
 
 			sinon.stub(Reply, 'findOne').resolves({ intent: 'Greeting', reply: 'Greeting' } as any);

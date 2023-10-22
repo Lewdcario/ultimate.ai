@@ -1,6 +1,13 @@
 name: Deploy Docs
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '__tests__/**'
+      - '.github/workflows/**'
 
 jobs:
   build_and_lint:
