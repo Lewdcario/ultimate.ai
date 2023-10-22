@@ -4,6 +4,7 @@ import validateSchema from '../middleware/validate';
 import { fetchIntents } from '../util/intents';
 import { Intent } from '../typings/intents';
 import { Reply } from '../util/db';
+import { Responses } from '../util/Constants';
 
 const router = Router();
 
@@ -20,27 +21,33 @@ router.post(
 	'/getReply',
 	validateSchema(getReplySchema),
 	asyncHandler(async (req, res) => {
-		const { botId, message } = req.body;
+		const { botId: botID, message } = req.body;
 
-		const intents = await fetchIntents(botId, message);
+		const intents = await fetchIntents(botID, message);
+
+		if (!intents?.length) {
+			res.json({ reply: Responses.NotFound });
+			return;
+		}
+
+		// This wasn't asked for, but I assumed it
+		if (intents.every((intent: Intent) => intent.confidence < 0.4)) {
+			res.json({ reply: Responses.NotFound });
+			return;
+		}
 
 		const highestConfidenceIntent = intents.length ? intents.reduce((prev: Intent, curr: Intent) => {
 			return prev.confidence > curr.confidence ? prev : curr;
 		}) : null;
 
 		if (!highestConfidenceIntent) {
-			res.json({ reply: 'Sorry, no reply found.' });
+			res.json({ reply: Responses.NotFound });
+			return;
 		}
-		else {
-			const replyDoc = await Reply.findOne({ intent: highestConfidenceIntent.name });
 
-			if (!replyDoc) {
-				const newReply = new Reply(highestConfidenceIntent);
-				await newReply.save();
-			}
+		const replyDoc = await Reply.findOne({ intent: highestConfidenceIntent.name });
 
-			res.json({ reply: replyDoc?.reply || highestConfidenceIntent.name || 'Sorry, no reply found.' });
-		}
+		res.json({ reply: replyDoc?.reply || Responses.NotFound });
 	})
 );
 

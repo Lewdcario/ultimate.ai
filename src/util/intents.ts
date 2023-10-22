@@ -14,7 +14,7 @@ const request = async (path: string, method: string, body?: object) => {
 	});
 };
 
-export const fetchIntents = async (botId: string, message: string): Promise<Intent[]> => {
+export const fetchIntents = async (botId: string, message: string): Promise<Intent[] | undefined> => {
 	const response = await request('/intents', 'POST', { botId, message });
 	const data = await response.json();
 

@@ -9,7 +9,9 @@ import errorHandler from './middleware/onError';
 import getReplyRoute from './routes/getReply';
 import testErrorRoute from './routes/error';
 
-mongoose.connect(process.env.MONGODB_URI!);
+import { seed } from './util/db';
+
+mongoose.connect(process.env.MONGODB_URI!).then(seed);
 
 const app = express();
 

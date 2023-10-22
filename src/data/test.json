@@ -1,0 +1,34 @@
+[
+	{
+		"message": "hello",
+		"intent": "Greeting"
+	},
+	{
+		"message": "bye",
+		"intent": "Goodbye"
+	},
+	{
+		"message": "i agree",
+		"intent": "Affirmative"
+	},
+	{
+		"message": "no",
+		"intent": "Negative"
+	},
+	{
+		"message": "thanks",
+		"intent": "Thank you"
+	},
+	{
+		"message": "are you a real person?",
+		"intent": "Are you a bot?"
+	},
+	{
+		"message": "i want to speak with a real person",
+		"intent": "I want to speak with a human"
+	},
+	{
+		"message": "i want to open an account",
+		"intent": "Open or close account"
+	}
+]
