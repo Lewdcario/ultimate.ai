@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   build_and_lint:
     runs-on: ubuntu-latest
+    env:
+      BOT_ID: ${{ secrets.BOT_ID }}
+      API_KEY: ${{ secrets.API_KEY }}
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
