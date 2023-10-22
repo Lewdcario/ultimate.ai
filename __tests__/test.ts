@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import assert from 'assert';
 import { expect } from 'chai';
@@ -9,7 +10,7 @@ import sinon from 'sinon';
 import app from '../src/Server';
 import asyncHandler from '../src/middleware/onPromise';
 import errorHandler from '../src/middleware/onError';
-import { Reply } from '../src/util/db';
+import { seed, Reply } from '../src/util/db';
 import { Responses } from '../src/util/Constants';
 
 import responseData from '../src/data/replies.json';
@@ -18,17 +19,21 @@ import testReplies from '../src/data/test.json';
 import { fetchIntents } from '../src/util/intents';
 import * as intentsModule from '../src/util/intents';
 
+let mongoServer;
+
 describe('Testing Suite', function() {
 	this.timeout(15000);
 
 	before(async () => {
-		await mongoose.connect(process.env.MONGODB_URI!);
-		mongoose.connection.on('connected', () => console.log('Mongoose is connected'));
-		mongoose.connection.on('error', (err) => console.log('Mongoose connection error: ', err));
+		mongoServer = await MongoMemoryServer.create();
+		const mongoUri = mongoServer.getUri();
+		await mongoose.connect(mongoUri);
+		await seed();
 	});
 
 	after(async () => {
-		await mongoose.connection.close();
+		await mongoose.disconnect();
+		await mongoServer.stop();
 	});
 
 	afterEach(() => {
@@ -165,13 +170,6 @@ describe('Testing Suite', function() {
 				.send({ botId: process.env.BOT_ID!, message: 'ldj#*(IDSJKjsidji@' });
 
 			expect(res.body.reply).to.equal(Responses.NotFound);
-		});
-
-		it('process.env.MONGODB_URI is filled and the database connects', async () => {
-			expect(process.env.MONGODB_URI).to.not.be.undefined;
-			const connection = await mongoose.connect(process.env.MONGODB_URI!);
-			expect(connection).to.not.be.undefined;
-			expect(mongoose.connection.readyState).to.equal(1);
 		});
 
 		// E2E test

@@ -11,7 +11,10 @@ import testErrorRoute from './routes/error';
 
 import { seed } from './util/db';
 
-mongoose.connect(process.env.MONGODB_URI!).then(seed);
+// This will conflict with the test otherwise
+if (process.env.NODE_ENV !== 'test') {
+	mongoose.connect(process.env.MONGODB_URI!).then(seed);
+}
 
 const app = express();
 
