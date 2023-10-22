@@ -16,22 +16,26 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
 
-      - name: Retrieve the cached "node_modules" directory (if present)
-        uses: actions/cache@v2
-        id: node-cache
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
 
-      - name: Install dependencies (if the cached directory was not found)
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: Cache Node.js modules
+        id: yarn-cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile --silent
+        env:
+          CI: true
 
       - name: Test to see if the project compiles
-        run: bash build.sh
-
-      - name: Perform automated checks
-        run: bash lint.sh
+        run: yarn build
 
       - name: Create the docs directory locally in CI
         run: npx typedoc src/index.ts
