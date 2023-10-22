@@ -8,9 +8,8 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import app from '../src/Server';
-import asyncHandler from '../src/middleware/onPromise';
 import errorHandler from '../src/middleware/onError';
-import { seed, Reply } from '../src/util/db';
+import { Reply, seed } from '../src/util/db';
 import { Responses } from '../src/util/Constants';
 
 import responseData from '../src/data/replies.json';
@@ -19,10 +18,10 @@ import testReplies from '../src/data/test.json';
 import { fetchIntents } from '../src/util/intents';
 import * as intentsModule from '../src/util/intents';
 
-let mongoServer;
+let mongoServer: MongoMemoryServer;
 
 describe('Testing Suite', function() {
-	this.timeout(15000);
+	this.timeout(5000);
 
 	before(async () => {
 		mongoServer = await MongoMemoryServer.create();
@@ -38,14 +37,6 @@ describe('Testing Suite', function() {
 
 	afterEach(() => {
 		sinon.restore();
-	});
-
-	describe('asyncHandler', () => {
-		it('should return a function', (done) => {
-			const fn = asyncHandler(() => {});
-			expect(typeof fn).to.equal('function');
-			done();
-		});
 	});
 
 	describe('errorHandler', () => {
@@ -94,7 +85,7 @@ describe('Testing Suite', function() {
 		});
 
 		it('Should return 400 if no body is provided', async () => {
-			const res = await request(app).post('/getReply');
+			const res = await request(app).post('/getReply').send();
 			expect(res.status).to.equal(400);
 			expect(res.body).to.have.property('errors').that.has.lengthOf(1);
 			expect(res.body.errors[0].message).to.include('botId');

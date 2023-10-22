@@ -12,7 +12,7 @@ function validateSchema<T extends AnySchema>(schema: T) {
 			return res.status(400).json({ errors: validate.errors });
 		}
 
-		next();
+		return next();
 	};
 }
 

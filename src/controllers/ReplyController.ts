@@ -1,12 +1,11 @@
-import { Router } from 'express';
-import asyncHandler from '../middleware/onPromise';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { Body, Controller, Post, Route, Middlewares } from 'tsoa';
 import validateSchema from '../middleware/validate';
 import { fetchIntents } from '../util/intents';
 import { Intent } from '../typings/intents';
 import { Reply } from '../util/db';
 import { Responses } from '../util/Constants';
-
-const router = Router();
 
 const getReplySchema = {
 	type: 'object',
@@ -17,23 +16,25 @@ const getReplySchema = {
 	required: ['botId', 'message']
 };
 
-router.post(
-	'/getReply',
-	validateSchema(getReplySchema),
-	asyncHandler(async (req, res) => {
-		const { botId: botID, message } = req.body;
+interface GetReplyRequestBody {
+	botId: string;
+	message: string;
+}
 
-		const intents = await fetchIntents(botID, message);
+@Route('getReply')
+@Middlewares([validateSchema(getReplySchema)])
+export class GetReplyController extends Controller {
+	@Post()
+	async getReply(@Body() body: GetReplyRequestBody) {
+		const intents = await fetchIntents(body.botId, body.message);
 
 		if (!intents?.length) {
-			res.json({ reply: Responses.NotFound });
-			return;
+			return { reply: Responses.NotFound };
 		}
 
 		// This wasn't asked for, but I assumed it
 		if (intents.every((intent: Intent) => intent.confidence < 0.4)) {
-			res.json({ reply: Responses.NotFound });
-			return;
+			return { reply: Responses.NotFound };
 		}
 
 		const highestConfidenceIntent = intents.length ? intents.reduce((prev: Intent, curr: Intent) => {
@@ -41,14 +42,11 @@ router.post(
 		}) : null;
 
 		if (!highestConfidenceIntent) {
-			res.json({ reply: Responses.NotFound });
-			return;
+			return { reply: Responses.NotFound };
 		}
 
 		const replyDoc = await Reply.findOne({ intent: highestConfidenceIntent.name });
 
-		res.json({ reply: replyDoc?.reply || Responses.NotFound });
-	})
-);
-
-export default router;
+		return { reply: replyDoc?.reply || Responses.NotFound };
+	}
+}
