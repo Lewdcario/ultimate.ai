@@ -30,9 +30,8 @@ jobs:
         env:
           CI: true
 
-      # Worked locally, having some hiccups in the deployment
-      #- name: Run tests
-      #  run: yarn test
+      - name: Run tests
+        run: yarn test
 
       - name: Generate Docs
         run: yarn docs
